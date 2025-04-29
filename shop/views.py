@@ -46,6 +46,22 @@ def products(request):
         'women_products': women_products,
     })
 
+def search_products(request):
+    """Search products by name or description"""
+    query = request.GET.get('q', '').strip()
+    if query:
+        products = Product.objects.filter(
+            name__icontains=query
+        ) | Product.objects.filter(
+            description__icontains=query
+        )
+    else:
+        products = Product.objects.none()  # Return empty queryset if no query
+    return render(request, 'shop/search_results.html', {
+        'products': products,
+        'query': query,
+    })
+
 def product_detail(request, pk):
     """Product detail page with size selection"""
     product = get_object_or_404(Product, pk=pk)
@@ -59,6 +75,7 @@ def product_detail(request, pk):
     })
 
 # shop/views.py
+@login_required(login_url='login')
 def add_to_cart(request, product_id):
     if request.method == 'POST':
         product = Product.objects.get(id=product_id)
@@ -97,6 +114,7 @@ def cart_view(request):
         'cart': cart,
         'total': total
     })
+
 def remove_from_cart(request, key):
     """Remove item from cart"""
     cart = request.session.get('cart', {})
@@ -540,7 +558,6 @@ def payment_cancel(request):
     """Handle cancelled payment"""
     messages.error(request, "Payment was cancelled.")
     return render(request, 'shop/cancel.html')
-
 
 @login_required
 def download_invoice(request, order_id):

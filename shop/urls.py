@@ -23,6 +23,7 @@ urlpatterns = [
     path('payment/success/', views.payment_success, name='payment_success'),
     path('payment/cancel/', views.payment_cancel, name='payment_cancel'),
     path('order/<int:order_id>/invoice/', views.download_invoice, name='download_invoice'),
+    path('search/', views.search_products, name='search_products'),
 ]
 
 if settings.DEBUG:
