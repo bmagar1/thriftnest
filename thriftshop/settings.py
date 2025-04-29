@@ -121,3 +121,19 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 LOGIN_URL = '/login/'
 
+# Authentication settings
+LOGIN_URL = 'login'  # URL name for login page (matches your login_view)
+LOGIN_REDIRECT_URL = 'home'  # Redirect after login (matches your home view)
+LOGOUT_REDIRECT_URL = 'login'  # Redirect after logout (matches your logout_view)
+
+# Khalti Configuration
+KHALTI_PUBLIC_KEY = "90103e2378254312801086a54bd6390f"  # Sandbox public key
+KHALTI_SECRET_KEY = "5a30c11b81904852b0454d729f573b3d"  # Sandbox secret key
+KHALTI_INITIATE_URL = "https://dev.khalti.com/api/v2/epayment/initiate/"  # Sandbox initiate URL
+KHALTI_VERIFY_URL = "https://dev.khalti.com/api/v2/epayment/lookup/"  # Corrected to lookup endpoint
+
+KHALTI_RETURN_URL = "http://localhost:8000/payment/success/"
+
+# Website URL (replace with your actual domain)
+WEBSITE_URL = "http://localhost:8000/"  # For local testing
+

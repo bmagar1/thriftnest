@@ -41,14 +41,14 @@
             {% for item in order.items.all %}
             <tr>
                 <td>{{ item.product.name }}</td>
-                <td>{{ item.size }}</td>
+                <td>{{ item.size|default:'N/A' }}</td>
                 <td>{{ item.quantity }}</td>
-                <td>Rs. {{ item.price }}</td>
+                <td>Rs. {{ item.price|floatformat:2 }}</td>
             </tr>
             {% endfor %}
         </tbody>
     </table>
 
-    <p class="total">Total: Rs. {{ order.total_price }}</p>
+    <p class="total">Total: Rs. {{ order.total|floatformat:2 }}</p>
 </body>
 </html>

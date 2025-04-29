@@ -111,7 +111,7 @@
         </div>
 
         <div class="total">
-            Total: Rs. {{ order.total_price|floatformat:2 }}
+            Total: Rs. {{ order.total|floatformat:2 }}
         </div>
         <div style="text-align: right; margin-top: 20px;">
             <a href="{% url 'download_invoice' order.id %}" 

@@ -7,7 +7,6 @@
     <title>Thrift Shop</title>
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-
     
     <style>
     :root {
@@ -63,65 +62,65 @@
     }
 
     /* Banner */
-        .banner {
-            text-align: center;
-            padding: 100px 20px;
-            position: relative;
-            background-image: url('{% static "images/background photo.jpg" %}');
-            background-size: cover;
-            background-position: center;
-            background-repeat: no-repeat;
-            color: white;
-            height: 500px; /* Set a fixed height or adjust as needed */
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
+    .banner {
+        text-align: center;
+        padding: 100px 20px;
+        position: relative;
+        background-image: url('{% static "images/background photo.jpg" %}');
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        color: white;
+        height: 500px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
 
-        .banner::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.5); /* Dark overlay */
-        }
-        
-        .banner-content {
-            position: relative;
-            z-index: 2;
-            max-width: 800px;
-        }
-        
-        .banner h1 {
-            font-size: 3.5rem;
-            margin-bottom: 15px;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5); /* Text shadow for better readability */
-        }
-        
-        .banner p {
-            font-size: 1.3rem;
-            margin-bottom: 25px;
-            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
-        }
-        
-        .btn {
-            background-color: var(--primary-color);
-            color: white;
-            padding: 14px 28px;
-            border-radius: 10px;
-            font-weight: bold;
-            font-size: 1rem;
-            display: inline-block;
-            transition: all 0.3s ease;
-        }
-        
-        .btn:hover {
-            background: var(--accent-color);
-            color: var(--primary-color);
-            transform: translateY(-2px);
-        }
+    .banner::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+    }
+    
+    .banner-content {
+        position: relative;
+        z-index: 2;
+        max-width: 800px;
+    }
+    
+    .banner h1 {
+        font-size: 3.5rem;
+        margin-bottom: 15px;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+    }
+    
+    .banner p {
+        font-size: 1.3rem;
+        margin-bottom: 25px;
+        text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
+    }
+    
+    .btn {
+        background-color: var(--primary-color);
+        color: white;
+        padding: 14px 28px;
+        border-radius: 10px;
+        font-weight: bold;
+        font-size: 1rem;
+        display: inline-block;
+        transition: all 0.3s ease;
+    }
+    
+    .btn:hover {
+        background: var(--accent-color);
+        color: var(--primary-color);
+        transform: translateY(-2px);
+    }
 
     /* Product Section */
     .product {
@@ -280,49 +279,46 @@
     }
 </style>   
 </head>
-<!-- Bootstrap JS Bundle -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <body>
-
+    <!-- Navigation Bar -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark px-4">
         <a class="navbar-brand" href="{% url 'home' %}">Thrift Shop</a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent">
-          <span class="navbar-toggler-icon"></span>
+            <span class="navbar-toggler-icon"></span>
         </button>
       
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
-          <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-            <li class="nav-item">
-              <a class="nav-link" href="{% url 'home' %}">Home</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="{% url 'products' %}">Products</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="{% url 'contact' %}">Contact Us</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="{% url 'get_involved' %}">Get Involved</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="{% url 'cart' %}">Cart</a>
-            </li>
-          </ul>
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'home' %}">Home</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'products' %}">Products</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'contact' %}">Contact Us</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'get_involved' %}">Get Involved</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'cart' %}">Cart</a>
+                </li>
+            </ul>
       
-          <ul class="navbar-nav ms-auto">
-            {% if user.is_authenticated %}
-              <li class="nav-item">
-                <a class="nav-link" href="{% url 'logout' %}">Logout</a>
-              </li>
-            {% else %}
-              <li class="nav-item">
-                <a class="nav-link" href="{% url 'login' %}">Login</a>
-              </li>
-            {% endif %}
-          </ul>
+            <ul class="navbar-nav ms-auto">
+                {% if user.is_authenticated %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'logout' %}">Logout</a>
+                    </li>
+                {% else %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'login' %}">Login</a>
+                    </li>
+                {% endif %}
+            </ul>
         </div>
-      </nav>
-      
+    </nav>
 
     <!-- Banner -->
     <section class="banner">
@@ -333,75 +329,31 @@
         </div>
     </section>
 
-<!-- Trending Clothes Section -->
-<section class="container py-5">
-    <h2 class="text-center mb-4">Trending Clothes</h2>
-    <div class="row" id="product-list">
-        {% for product in trending_clothes %}
-            <div class="col-md-4 mb-4">
-                <div class="card h-100">
-                    <img src="{{ product.image.url }}" alt="{{ product.name }}" class="card-img-top" style="height: 250px; object-fit: cover;">
-                    <div class="card-body">
-                        <h5 class="card-title">{{ product.name }}</h5>
-                        <p class="card-text">{{ product.description|truncatewords:15 }}</p>
-                        <a href="{% url 'product_detail' product.id %}" class="btn btn-primary">View Details</a>
+    <!-- Trending Clothes Section -->
+    <section class="container py-5">
+        <h2 class="text-center mb-4">Trending Clothes</h2>
+        <div class="row" id="product-list">
+            {% for item in trending_clothes %}
+                <div class="col-md-4 mb-4">
+                    <div class="card h-100">
+                        <img src="{{ item.image.url }}" alt="{{ item.product.name }}" class="card-img-top" style="height: 250px; object-fit: cover;">
+                        <div class="card-body">
+                            <h5 class="card-title">{{ item.product.name }}</h5>
+                            <p class="card-text">{{ item.description|default:item.product.description|truncatewords:15 }}</p>
+                            <a href="{% url 'product_detail' item.product.id %}" class="btn btn-primary">View Details</a>
+                        </div>
                     </div>
                 </div>
-            </div>
-        {% empty %}
-            <p class="col-12 text-center">No trending products available.</p>
-        {% endfor %}
-    </div>
-    
-    <!-- Load More Button -->
-    <div class="text-center">
-        <button id="load-more" class="btn btn-secondary">Load More</button>
-    </div>
-</section>
-
-<!-- Bootstrap JS Bundle -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-
-<!-- JavaScript for Load More Button -->
-<script>
-    document.getElementById('load-more').addEventListener('click', function() {
-        // Get the current number of displayed products
-        const currentCount = document.querySelectorAll('#product-list .col-md-4').length;
-
-        // Send AJAX request to fetch more products
-        fetch(`/load_more_products/?start=${currentCount}`)
-            .then(response => response.json())
-            .then(data => {
-                // Append new products to the list
-                const productList = document.getElementById('product-list');
-                data.products.forEach(product => {
-                    const productHTML = `
-                        <div class="col-md-4 mb-4">
-                            <div class="card h-100">
-                                <img src="${product.image_url}" alt="${product.name}" class="card-img-top" style="height: 250px; object-fit: cover;">
-                                <div class="card-body">
-                                    <h5 class="card-title">${product.name}</h5>
-                                    <p class="card-text">${product.description}</p>
-                                    <a href="#" class="btn btn-primary">View Details</a>
-                                </div>
-                            </div>
-                        </div>
-                    `;
-                    productList.insertAdjacentHTML('beforeend', productHTML);
-                });
-
-                // If no more products, hide the "Load More" button
-                if (!data.has_more) {
-                    document.getElementById('load-more').style.display = 'none';
-                }
-            })
-            .catch(error => {
-                console.error('Error loading more products:', error);
-            });
-    });
-</script>
-</body>
-</html>
+            {% empty %}
+                <p class="col-12 text-center">No trending products available.</p>
+            {% endfor %}
+        </div>
+        
+        <!-- Load More Button -->
+        <div class="text-center">
+            <button id="load-more" class="btn btn-secondary">Load More</button>
+        </div>
+    </section>
 
     <!-- Customer Reviews Section -->
     <section class="reviews-section">
@@ -423,23 +375,23 @@
     </section>
 
     <!-- About Us Section -->
-<section class="about">
-    <div class="about-container">
-        <div class="about-image">
-            <img src="{% static 'images/haha.PNG' %}" alt="Thrift Shop">
+    <section class="about">
+        <div class="about-container">
+            <div class="about-image">
+                <img src="{% static 'images/haha.PNG' %}" alt="Thrift Shop">
+            </div>
+            <div class="about-text">
+                <h2>About Us</h2>
+                <p><strong>We Are The <em>Affordable Thrift Store Nepal (Profit Based Organization)</em></strong></p>
+                <p>We are the first physical buy/sell thrift store in the city located at , Pokhara. Established in 2020, we have been serving our secondhand loving customers all over Nepal. From us, you can buy and sell secondhand/reusable clothes and accessories at reasonable prices.</p>
+                <a href="#" class="btn">Read More</a>
+            </div>
         </div>
-        <div class="about-text">
-            <h2>About Us</h2>
-            <p><strong>We Are The <em>Affordable Thrift Store Nepal (Profit Based Organization)</em></strong></p>
-            <p>We are the first physical buy/sell thrift store in the city located at , Pokhara. Established in 2020, we have been serving our secondhand loving customers all over Nepal. From us, you can buy and sell secondhand/reusable clothes and accessories at reasonable prices.</p>
-            <a href="#" class="btn">Read More</a>
-        </div>
-    </div>
-</section>
+    </section>
 
     <!-- Footer -->
     <footer>
-        <p>&copy; 2025 Thrift Shop. All rights reserved.</p>
+        <p>© 2025 Thrift Shop. All rights reserved.</p>
         <p>Follow us on:
             <a href="#">Facebook</a> |
             <a href="#">Instagram</a> |
@@ -447,5 +399,40 @@
         </p>
     </footer>
 
+    <!-- Bootstrap JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- JavaScript for Load More Button -->
+    <script>
+        document.getElementById('load-more').addEventListener('click', function() {
+            const currentCount = document.querySelectorAll('#product-list .col-md-4').length;
+            fetch(`/load_more_products/?start=${currentCount}`)
+                .then(response => response.json())
+                .then(data => {
+                    const productList = document.getElementById('product-list');
+                    data.products.forEach(product => {
+                        const productHTML = `
+                            <div class="col-md-4 mb-4">
+                                <div class="card h-100">
+                                    <img src="${product.image_url}" alt="${product.name}" class="card-img-top" style="height: 250px; object-fit: cover;">
+                                    <div class="card-body">
+                                        <h5 class="card-title">${product.name}</h5>
+                                        <p class="card-text">${product.description}</p>
+                                        <a href="/products/${product.id}/" class="btn btn-primary">View Details</a>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                        productList.insertAdjacentHTML('beforeend', productHTML);
+                    });
+                    if (!data.has_more) {
+                        document.getElementById('load-more').style.display = 'none';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading more products:', error);
+                });
+        });
+    </script>
 </body>
 </html>
