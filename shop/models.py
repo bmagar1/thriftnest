@@ -75,6 +75,7 @@ class Order(models.Model):
     ordered_at = models.DateTimeField(default=now)
     shipping_address = models.TextField(blank=True, null=True)  # Added for Khalti
     billing_address = models.TextField(blank=True, null=True)  # Added for Khalti
+    created = models.DateTimeField(auto_now_add=True, null=True)
 
     def __str__(self):
         return f"Order #{self.id} by {self.user.username}"
@@ -95,6 +96,7 @@ class Payment(models.Model):
     amount = models.DecimalField(max_digits=10, decimal_places=2)
     status = models.CharField(max_length=20, default='pending')
     created_at = models.DateTimeField(auto_now_add=True)
+    created = models.DateTimeField(auto_now_add=True, null=True)
 
     def __str__(self):
         return f"Payment for Order {self.order.id}"

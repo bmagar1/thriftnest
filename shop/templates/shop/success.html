@@ -41,9 +41,11 @@
 <body>
     <div class="container">
         <div class="success-container">
-            <h2>Payment Successful!</h2>
-            <p>Thank you for your purchase. Your order #{{ order.id }} has been placed.</p>
-            <a href="{% url 'home' %}" class="btn btn-primary">Return to Home</a>
+            <h1>Payment Successful!</h1>
+<p>Your order #{{ order.id }} has been placed.</p>
+{% if pdf_data %}
+  <a href="data:application/pdf;base64,{{ pdf_data }}" download="{{ pdf_filename }}">Download Invoice</a>
+{% endif %}
         </div>
     </div>
     <footer>

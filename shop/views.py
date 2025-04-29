@@ -7,6 +7,12 @@ from django.contrib.auth.decorators import login_required
 from django.template.loader import get_template
 from xhtml2pdf import pisa
 from .models import Product, TrendingClothes, Order, OrderItem
+from reportlab.lib.pagesizes import letter
+from reportlab.lib import colors
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.lib.units import inch
+import io
 
 def home(request):
     """Home page displaying trending clothes"""
@@ -82,6 +88,7 @@ def add_to_cart(request, product_id):
         messages.success(request, f"{product.name} added to cart!")
         return redirect('cart')
     return redirect('products')
+
 def cart_view(request):
     """Display cart contents"""
     cart = request.session.get('cart', {})
@@ -205,11 +212,15 @@ def checkout(request):
 
     # GET request: Render checkout form
     return render(request, 'shop/checkout.html', {'cart': cart, 'total': total})
+
 @login_required
 def order_detail(request, order_id):
-    """Display order details"""
-    order = get_object_or_404(Order, pk=order_id, user=request.user)
-    return render(request, 'shop/order_detail.html', {'order': order})
+    order = get_object_or_404(Order, id=order_id, user=request.user)
+    payment = order.payment_set.first()
+    return render(request, 'shop/order_detail.html', {
+        'order': order,
+        'payment': payment
+    })
 
 def render_to_pdf(template_src, context_dict={}):
     """Generate PDF from template"""
@@ -386,7 +397,7 @@ from django.views.decorators.csrf import csrf_exempt
 
 @csrf_exempt
 def payment_success(request):
-    """Handle successful payment"""
+    """Handle successful payment and generate invoice"""
     pidx = request.GET.get('pidx')
     if not pidx:
         messages.error(request, "Invalid payment response.")
@@ -410,10 +421,110 @@ def payment_success(request):
             payment.save()
             order.status = 'completed'
             order.save()
+
+            # Generate invoice PDF
+            buffer = io.BytesIO()
+            doc = SimpleDocTemplate(buffer, pagesize=letter, topMargin=0.5*inch, bottomMargin=0.5*inch)
+            elements = []
+            styles = getSampleStyleSheet()
+
+            # Custom styles
+            title_style = ParagraphStyle(
+                name='Title',
+                fontSize=18,
+                spaceAfter=12,
+                textColor=colors.HexColor('#4e342e'),
+                alignment=1  # Center
+            )
+            subtitle_style = ParagraphStyle(
+                name='Subtitle',
+                fontSize=12,
+                spaceAfter=8,
+                textColor=colors.HexColor('#333333')
+            )
+            normal_style = ParagraphStyle(
+                name='Normal',
+                fontSize=10,
+                spaceAfter=6,
+                textColor=colors.HexColor('#333333')
+            )
+
+            # Header
+            elements.append(Paragraph("Thrift Shop Invoice", title_style))
+            elements.append(Paragraph(f"Order #{order.id}", subtitle_style))
+            elements.append(Paragraph(f"Date: {order.created.strftime('%Y-%m-%d')}", subtitle_style))
+            elements.append(Spacer(1, 12))
+
+            # Customer Information
+            elements.append(Paragraph("Customer Details", subtitle_style))
+            elements.append(Paragraph(f"Name: {request.user.get_full_name() or request.user.username}", normal_style))
+            elements.append(Paragraph(f"Email: {request.user.email}", normal_style))
+            elements.append(Spacer(1, 12))
+
+            # Billing and Shipping Addresses
+            billing_address = order.billing_address if order.billing_address else "Not provided"
+            shipping_address = order.shipping_address if order.shipping_address else "Not provided"
+            elements.append(Paragraph("Billing Address", subtitle_style))
+            elements.append(Paragraph(billing_address, normal_style))
+            elements.append(Paragraph("Shipping Address", subtitle_style))
+            elements.append(Paragraph(shipping_address, normal_style))
+            elements.append(Spacer(1, 12))
+
+            # Order Items Table
+            elements.append(Paragraph("Order Items", subtitle_style))
+            data = [['Product', 'Size', 'Quantity', 'Unit Price', 'Total']]
+            for item in order.items.all():
+                data.append([
+                    item.product.name,
+                    item.size or 'N/A',
+                    str(item.quantity),
+                    f"Rs. {item.price:,.2f}",
+                    f"Rs. {item.price * item.quantity:,.2f}"
+                ])
+
+            table = Table(data)
+            table.setStyle(TableStyle([
+                ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#4e342e')),
+                ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
+                ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+                ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+                ('FONTSIZE', (0, 0), (-1, 0), 12),
+                ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+                ('BACKGROUND', (0, 1), (-1, -1), colors.HexColor('#f9f1e7')),
+                ('GRID', (0, 0), (-1, -1), 1, colors.HexColor('#e0cdbd')),
+                ('FONTSIZE', (0, 1), (-1, -1), 10),
+            ]))
+            elements.append(table)
+            elements.append(Spacer(1, 12))
+
+            # Payment Details
+            elements.append(Paragraph("Payment Details", subtitle_style))
+            elements.append(Paragraph(f"Total Amount: Rs. {order.total:,.2f}", normal_style))
+            elements.append(Paragraph(f"Payment Status: {payment.status.capitalize()}", normal_style))
+            elements.append(Paragraph(f"Khalti Transaction ID: {payment.khalti_pidx}", normal_style))
+            elements.append(Paragraph(f"Payment Date: {payment.created.strftime('%Y-%m-%d %H:%M:%S')}", normal_style))
+            elements.append(Spacer(1, 12))
+
+            # Footer
+            elements.append(Paragraph("Thank you for shopping with Thrift Nest!", normal_style))
+            elements.append(Paragraph("Contact us: support@thriftshop.com | +977-9800000001", normal_style))
+
+            # Build PDF
+            doc.build(elements)
+            buffer.seek(0)
+
+            # Encode PDF to base64 to pass to template
+            import base64
+            pdf_data = base64.b64encode(buffer.getvalue()).decode('utf-8')
+
             # Clear cart
             request.session['cart'] = {}
             messages.success(request, "Payment successful! Your order has been placed.")
-            return render(request, 'shop/success.html', {'order': order})
+            return render(request, 'shop/success.html', {
+                'order': order,
+                'pdf_data': pdf_data,
+                'pdf_filename': f'invoice_order_{order.id}.pdf'
+            })
         else:
             payment.status = 'failed'
             payment.save()
@@ -424,8 +535,111 @@ def payment_success(request):
     except (requests.RequestException, Payment.DoesNotExist):
         messages.error(request, "Error verifying payment.")
         return redirect('cart')
-
+    
 def payment_cancel(request):
     """Handle cancelled payment"""
     messages.error(request, "Payment was cancelled.")
     return render(request, 'shop/cancel.html')
+
+
+@login_required
+def download_invoice(request, order_id):
+    order = get_object_or_404(Order, id=order_id, user=request.user)
+    payment = order.payment_set.first()  # Get the associated payment
+
+    # Create a PDF response
+    buffer = io.BytesIO()
+    doc = SimpleDocTemplate(buffer, pagesize=letter, topMargin=0.5*inch, bottomMargin=0.5*inch)
+    elements = []
+    styles = getSampleStyleSheet()
+
+    # Custom styles
+    title_style = ParagraphStyle(
+        name='Title',
+        fontSize=18,
+        spaceAfter=12,
+        textColor=colors.HexColor('#4e342e'),
+        alignment=1  # Center
+    )
+    subtitle_style = ParagraphStyle(
+        name='Subtitle',
+        fontSize=12,
+        spaceAfter=8,
+        textColor=colors.HexColor('#333333')
+    )
+    normal_style = ParagraphStyle(
+        name='Normal',
+        fontSize=10,
+        spaceAfter=6,
+        textColor=colors.HexColor('#333333')
+    )
+
+    # Header
+    elements.append(Paragraph("Thrift Shop Invoice", title_style))
+    elements.append(Paragraph(f"Order #{order.id}", subtitle_style))
+    elements.append(Paragraph(f"Date: {order.created_at.strftime('%Y-%m-%d')}", subtitle_style))
+    elements.append(Spacer(1, 12))
+
+    # Customer Information
+    elements.append(Paragraph("Customer Details", subtitle_style))
+    elements.append(Paragraph(f"Name: {request.user.get_full_name() or request.user.username}", normal_style))
+    elements.append(Paragraph(f"Email: {request.user.email}", normal_style))
+    elements.append(Spacer(1, 12))
+
+    # Billing and Shipping Addresses
+    elements.append(Paragraph("Billing Address", subtitle_style))
+    elements.append(Paragraph(order.billing_address, normal_style))
+    elements.append(Paragraph("Shipping Address", subtitle_style))
+    elements.append(Paragraph(order.shipping_address, normal_style))
+    elements.append(Spacer(1, 12))
+
+    # Order Items Table
+    elements.append(Paragraph("Order Items", subtitle_style))
+    data = [['Product', 'Size', 'Quantity', 'Unit Price', 'Total']]
+    for item in order.items.all():
+        data.append([
+            item.product.name,
+            item.size or 'N/A',
+            str(item.quantity),
+            f"Rs. {item.price:,.2f}",
+            f"Rs. {item.price * item.quantity:,.2f}"
+        ])
+
+    table = Table(data)
+    table.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#4e342e')),
+        ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
+        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+        ('FONTSIZE', (0, 0), (-1, 0), 12),
+        ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+        ('BACKGROUND', (0, 1), (-1, -1), colors.HexColor('#f9f1e7')),
+        ('GRID', (0, 0), (-1, -1), 1, colors.HexColor('#e0cdbd')),
+        ('FONTSIZE', (0, 1), (-1, -1), 10),
+    ]))
+    elements.append(table)
+    elements.append(Spacer(1, 12))
+
+    # Payment Details
+    elements.append(Paragraph("Payment Details", subtitle_style))
+    elements.append(Paragraph(f"Total Amount: Rs. {order.total:,.2f}", normal_style))
+    if payment:
+        elements.append(Paragraph(f"Payment Status: {payment.status.capitalize()}", normal_style))
+        elements.append(Paragraph(f"Khalti Transaction ID: {payment.khalti_pidx}", normal_style))
+        elements.append(Paragraph(f"Payment Date: {payment.created_at.strftime('%Y-%m-%d %H:%M:%S')}", normal_style))
+    else:
+        elements.append(Paragraph("Payment Status: Pending", normal_style))
+    elements.append(Spacer(1, 12))
+
+    # Footer
+    elements.append(Paragraph("Thank you for shopping with Thrift Nest!", normal_style))
+    elements.append(Paragraph("Contact us: support@thriftshop.com | +977-9800000001", normal_style))
+
+    # Build PDF
+    doc.build(elements)
+    buffer.seek(0)
+
+    # Serve PDF as download
+    response = HttpResponse(buffer, content_type='application/pdf')
+    response['Content-Disposition'] = f'attachment; filename=invoice_order_{order.id}.pdf'
+    return response
